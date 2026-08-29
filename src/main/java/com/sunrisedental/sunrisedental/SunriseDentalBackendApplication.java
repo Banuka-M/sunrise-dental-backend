@@ -1,4 +1,4 @@
-package com.sunrisedental.sunrise_dental_backend;
+package com.sunrisedental.sunrisedental;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

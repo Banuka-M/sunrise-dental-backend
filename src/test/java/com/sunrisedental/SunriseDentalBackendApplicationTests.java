@@ -1,4 +1,4 @@
-package com.sunrisedental.sunrisedental;
+package com.sunrisedental;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

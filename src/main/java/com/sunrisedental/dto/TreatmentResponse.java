@@ -1,37 +1,30 @@
-package com.sunrisedental.model;
-
-import jakarta.persistence.*;
+package com.sunrisedental.dto;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "treatments")
-public class Treatment {
+public class TreatmentResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long treatmentId;
-
-    @Column(nullable = false, unique = true)
     private String name;
-
-    @Column(length = 1000)
     private String description;
-
-    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal fee;
+    private boolean active;
 
-    @Column(nullable = false)
-    private boolean active = true;
-
-    public Treatment() {
+    public TreatmentResponse() {
     }
 
-    public Treatment(String name, String description, BigDecimal fee) {
+    public TreatmentResponse(
+            Long treatmentId,
+            String name,
+            String description,
+            BigDecimal fee,
+            boolean active) {
+
+        this.treatmentId = treatmentId;
         this.name = name;
         this.description = description;
         this.fee = fee;
-        this.active = true;
+        this.active = active;
     }
 
     public Long getTreatmentId() {

@@ -13,6 +13,9 @@ public interface UserRepository
 
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByEmail(String email);
+
+
     Boolean existsByUsername(String username);
 
     List<User> findAllByOrderByUserIdAsc();

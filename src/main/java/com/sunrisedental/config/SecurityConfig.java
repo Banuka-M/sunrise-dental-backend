@@ -77,8 +77,25 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/api/auth/**")
+                                .requestMatchers("/api/auth/login")
                                 .permitAll()
+
+                                .requestMatchers("/api/auth/register/patient")
+                                .permitAll()
+
+                                .requestMatchers("/api/auth/change-password")
+                                .authenticated()
+
+                                .requestMatchers("/api/auth/forgot-password")
+                                .permitAll()
+
+                                .requestMatchers("/api/auth/reset-password")
+                                .permitAll()
+
+                                .requestMatchers("/api/auth/logout")
+                                .authenticated()
+
+
 
                                 // CORS preflight
                                 .requestMatchers(HttpMethod.OPTIONS, "/**")
@@ -102,6 +119,7 @@ public class SecurityConfig {
                                 .anyRequest()
                                 .authenticated()
                 );
+
 
         http.authenticationProvider(authenticationProvider());
 

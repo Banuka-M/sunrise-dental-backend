@@ -54,6 +54,12 @@ public interface AppointmentRepository
             Long dentistId
     );
 
+    List<Appointment> findByAppointmentDateBetween(
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
+
     /*
      * All appointments.
      */

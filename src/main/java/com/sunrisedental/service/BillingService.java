@@ -22,18 +22,25 @@ public class BillingService {
     private final TreatmentRecordRepository treatmentRecordRepository;
     private final UserRepository userRepository;
 
+    private final NotificationService notificationService;
+
+
     public BillingService(
             BillRepository billRepository,
             PaymentRepository paymentRepository,
             TreatmentRecordRepository treatmentRecordRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            NotificationService notificationService) {
 
         this.billRepository = billRepository;
         this.paymentRepository = paymentRepository;
         this.treatmentRecordRepository =
                 treatmentRecordRepository;
         this.userRepository = userRepository;
+        this.notificationService =
+                notificationService;
     }
+
 
 
     @Transactional
@@ -96,6 +103,18 @@ public class BillingService {
 
         Bill saved =
                 billRepository.save(bill);
+
+        notificationService.createNotificationWithEmail(
+                record.getPatient(),
+                "New Dental Bill",
+                "A new bill "
+                        + saved.getBillNumber()
+                        + " has been created for your treatment. "
+                        + "Total amount: "
+                        + saved.getTotalAmount(),
+                NotificationType.BILL
+        );
+
 
         return convertBillToResponse(saved);
     }
@@ -290,6 +309,20 @@ public class BillingService {
         }
 
         billRepository.save(bill);
+
+        notificationService.createNotificationWithEmail(
+                bill.getPatient(),
+                "Payment Received",
+                "Your payment of "
+                        + amount
+                        + " for bill "
+                        + bill.getBillNumber()
+                        + " has been received. "
+                        + "Remaining balance: "
+                        + bill.getTotalAmount()
+                        .subtract(bill.getPaidAmount()),
+                NotificationType.PAYMENT
+        );
 
         return convertPaymentToResponse(
                 savedPayment

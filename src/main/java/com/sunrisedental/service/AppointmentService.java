@@ -23,6 +23,8 @@ public class AppointmentService {
     private final PatientRepository patientRepository;
     private final DentistRepository dentistRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+
 
     /*
      * Clinic working hours.
@@ -53,13 +55,16 @@ public class AppointmentService {
             AppointmentRepository appointmentRepository,
             PatientRepository patientRepository,
             DentistRepository dentistRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            NotificationService notificationService) {
 
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.dentistRepository = dentistRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
+
 
     // =========================================================
     // PATIENT BOOKING
@@ -207,6 +212,9 @@ public class AppointmentService {
 
         Appointment saved =
                 appointmentRepository.save(appointment);
+
+        notificationService.notifyAppointmentBooked(saved);
+
 
         return convertToResponse(saved);
     }
@@ -428,9 +436,10 @@ public class AppointmentService {
     // COMMON UPDATE
     // =========================================================
 
-    private void updateAppointment(
+    private Appointment updateAppointment(
             Appointment appointment,
             AppointmentRequest request) {
+
 
         if (appointment.getStatus()
                 == AppointmentStatus.CANCELLED) {
@@ -521,7 +530,13 @@ public class AppointmentService {
                 request.getDescription()
         );
 
-        appointmentRepository.save(appointment);
+        Appointment saved =
+                appointmentRepository.save(appointment);
+
+        notificationService.notifyAppointmentUpdated(saved);
+
+        return saved;
+
     }
 
     // =========================================================
@@ -615,6 +630,11 @@ public class AppointmentService {
         );
 
         appointmentRepository.save(appointment);
+
+        notificationService.notifyAppointmentCancelled(
+                appointment
+        );
+
     }
 
     // =========================================================

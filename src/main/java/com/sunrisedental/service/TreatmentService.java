@@ -22,18 +22,27 @@ public class TreatmentService {
     private final TreatmentRepository treatmentRepository;
     private final TreatmentRecordRepository treatmentRecordRepository;
     private final AppointmentRepository appointmentRepository;
+    private final NotificationService notificationService;
+
 
     public TreatmentService(
             TreatmentRepository treatmentRepository,
             TreatmentRecordRepository treatmentRecordRepository,
             AppointmentRepository appointmentRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            NotificationService notificationService) {
 
         this.treatmentRepository = treatmentRepository;
-        this.treatmentRecordRepository = treatmentRecordRepository;
-        this.appointmentRepository = appointmentRepository;
-        this.userRepository = userRepository;
+        this.treatmentRecordRepository =
+                treatmentRecordRepository;
+        this.appointmentRepository =
+                appointmentRepository;
+        this.userRepository =
+                userRepository;
+        this.notificationService =
+                notificationService;
     }
+
 
     // =========================================================
     // VIEW AVAILABLE TREATMENTS
@@ -136,6 +145,18 @@ public class TreatmentService {
         );
 
         appointmentRepository.save(appointment);
+
+        notificationService.createNotificationWithEmail(
+                appointment.getPatient(),
+                "Treatment Completed",
+                "Your treatment for appointment "
+                        + appointment.getAppointmentNumber()
+                        + " has been completed by Dr. "
+                        + appointment.getDentist().getFullName()
+                        + ".",
+                NotificationType.APPOINTMENT_COMPLETED
+        );
+
 
         return convertToResponse(saved);
     }

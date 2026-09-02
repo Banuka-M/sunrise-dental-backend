@@ -28,6 +28,10 @@ public class BillResponse {
 
     private LocalDateTime createdAt;
 
+    private BigDecimal treatmentAmount;
+    private BigDecimal consultationAmount;
+
+
     public BillResponse() {
     }
 
@@ -154,4 +158,21 @@ public class BillResponse {
 
         this.createdAt = createdAt;
     }
+
+    public BigDecimal getTreatmentAmount() {
+        return treatmentAmount;
+    }
+
+    public void setTreatmentAmount(BigDecimal treatmentAmount) {
+        this.treatmentAmount = treatmentAmount;
+    }
+
+    public BigDecimal getConsultationAmount() {
+        return consultationAmount;
+    }
+
+    public void setConsultationAmount(BigDecimal consultationAmount) {
+        this.consultationAmount = consultationAmount;
+    }
+
 }

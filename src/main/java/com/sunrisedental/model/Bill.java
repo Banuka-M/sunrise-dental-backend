@@ -28,6 +28,21 @@ public class Bill {
     )
     private String billNumber;
 
+    @Column(
+            nullable = false,
+            precision = 10,
+            scale = 2
+    )
+    private BigDecimal treatmentAmount;
+
+    @Column(
+            nullable = false,
+            precision = 10,
+            scale = 2
+    )
+    private BigDecimal consultationAmount;
+
+
     /*
      * Treatment record for which this bill was generated.
      */
@@ -171,5 +186,21 @@ public class Bill {
             LocalDateTime createdAt) {
 
         this.createdAt = createdAt;
+    }
+
+    public BigDecimal getTreatmentAmount() {
+        return treatmentAmount;
+    }
+
+    public void setTreatmentAmount(BigDecimal treatmentAmount) {
+        this.treatmentAmount = treatmentAmount;
+    }
+
+    public BigDecimal getConsultationAmount() {
+        return consultationAmount;
+    }
+
+    public void setConsultationAmount(BigDecimal consultationAmount) {
+        this.consultationAmount = consultationAmount;
     }
 }

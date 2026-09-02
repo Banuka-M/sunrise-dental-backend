@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -19,7 +20,8 @@ public class SystemSettingService {
     public SystemSettingService(
             SystemSettingRepository systemSettingRepository) {
 
-        this.systemSettingRepository = systemSettingRepository;
+        this.systemSettingRepository =
+                systemSettingRepository;
     }
 
     // =========================================================
@@ -39,9 +41,11 @@ public class SystemSettingService {
     // GET ONE SETTING
     // =========================================================
 
-    public SystemSettingResponse getSetting(String key) {
+    public SystemSettingResponse getSetting(
+            String key) {
 
-        String normalizedKey = normalizeKey(key);
+        String normalizedKey =
+                normalizeKey(key);
 
         SystemSetting setting =
                 systemSettingRepository
@@ -53,6 +57,46 @@ public class SystemSettingService {
                         );
 
         return convertToResponse(setting);
+    }
+
+    // =========================================================
+    // GET CONSULTATION FEE
+    // =========================================================
+
+    public BigDecimal getConsultationFee() {
+
+        SystemSetting setting =
+                systemSettingRepository
+                        .findBySettingKey("CONSULTATION_FEE")
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Consultation fee is not configured."
+                                )
+                        );
+
+        String value =
+                setting.getSettingValue();
+
+        try {
+
+            BigDecimal fee =
+                    new BigDecimal(value.trim());
+
+            if (fee.compareTo(BigDecimal.ZERO) < 0) {
+
+                throw new IllegalArgumentException(
+                        "Consultation fee cannot be negative."
+                );
+            }
+
+            return fee;
+
+        } catch (NumberFormatException e) {
+
+            throw new IllegalArgumentException(
+                    "Invalid consultation fee configuration."
+            );
+        }
     }
 
     // =========================================================
@@ -78,9 +122,11 @@ public class SystemSettingService {
                 new SystemSetting();
 
         setting.setSettingKey(key);
+
         setting.setSettingValue(
                 request.getSettingValue().trim()
         );
+
         setting.setDescription(
                 request.getDescription()
         );
@@ -131,7 +177,8 @@ public class SystemSettingService {
     // =========================================================
 
     @Transactional
-    public void deleteSetting(String key) {
+    public void deleteSetting(
+            String key) {
 
         String normalizedKey =
                 normalizeKey(key);
@@ -152,19 +199,29 @@ public class SystemSettingService {
     // HELPERS
     // =========================================================
 
-    private String normalizeKey(String key) {
+    private String normalizeKey(
+            String key) {
 
-        if (key == null || key.trim().isEmpty()) {
+        if (key == null
+                || key.trim().isEmpty()) {
+
             throw new IllegalArgumentException(
                     "Setting key is required."
             );
         }
 
-        return key.trim().toUpperCase();
+        return key
+                .trim()
+                .toUpperCase();
     }
 
+    // =========================================================
+    // CONVERT TO RESPONSE
+    // =========================================================
+
     private SystemSettingResponse
-    convertToResponse(SystemSetting setting) {
+    convertToResponse(
+            SystemSetting setting) {
 
         return new SystemSettingResponse(
                 setting.getSettingId(),

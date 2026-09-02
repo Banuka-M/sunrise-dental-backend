@@ -21,8 +21,9 @@ public class BillingService {
     private final PaymentRepository paymentRepository;
     private final TreatmentRecordRepository treatmentRecordRepository;
     private final UserRepository userRepository;
-
     private final NotificationService notificationService;
+    private final SystemSettingService systemSettingService;
+
 
 
     public BillingService(
@@ -30,7 +31,8 @@ public class BillingService {
             PaymentRepository paymentRepository,
             TreatmentRecordRepository treatmentRecordRepository,
             UserRepository userRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService,
+            SystemSettingService systemSettingService) {
 
         this.billRepository = billRepository;
         this.paymentRepository = paymentRepository;
@@ -39,7 +41,10 @@ public class BillingService {
         this.userRepository = userRepository;
         this.notificationService =
                 notificationService;
+        this.systemSettingService =
+                systemSettingService;
     }
+
 
 
 
@@ -81,23 +86,32 @@ public class BillingService {
             );
         }
 
-        BigDecimal fee =
+        BigDecimal treatmentFee =
                 record.getTreatment().getFee();
 
-        if (fee == null
-                || fee.compareTo(BigDecimal.ZERO) <= 0) {
+        if (treatmentFee == null
+                || treatmentFee.compareTo(BigDecimal.ZERO) <= 0) {
 
             throw new IllegalArgumentException(
                     "Treatment fee must be greater than zero."
             );
         }
 
+        BigDecimal consultationFee =
+                systemSettingService.getConsultationFee();
+
+        BigDecimal totalFee =
+                treatmentFee.add(consultationFee);
+
+
         Bill bill =
                 new Bill();
 
         bill.setTreatmentRecord(record);
         bill.setPatient(record.getPatient());
-        bill.setTotalAmount(fee);
+
+        bill.setTotalAmount(totalFee);
+
         bill.setPaidAmount(BigDecimal.ZERO);
         bill.setStatus(BillStatus.UNPAID);
 
@@ -448,6 +462,21 @@ public class BillingService {
                 treatment.getName()
         );
 
+        BigDecimal treatmentAmount =
+                treatment.getFee();
+
+        BigDecimal consultationAmount =
+                systemSettingService.getConsultationFee();
+
+        response.setTreatmentAmount(
+                treatmentAmount
+        );
+
+        response.setConsultationAmount(
+                consultationAmount
+        );
+
+
         response.setTotalAmount(
                 bill.getTotalAmount()
         );
@@ -455,6 +484,7 @@ public class BillingService {
         response.setPaidAmount(
                 bill.getPaidAmount()
         );
+
 
         response.setRemainingAmount(
                 bill.getTotalAmount()

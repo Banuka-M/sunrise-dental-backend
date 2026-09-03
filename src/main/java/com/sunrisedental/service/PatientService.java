@@ -7,6 +7,10 @@ import com.sunrisedental.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.sunrisedental.dto.AdminUserResponse;
+import com.sunrisedental.dto.AdminUserUpdateRequest;
+import com.sunrisedental.model.User;
+import com.sunrisedental.repository.UserRepository;
 
 @Service
 public class PatientService {
@@ -37,5 +41,54 @@ public class PatientService {
         patient.setRole(Role.PATIENT);
 
         return patientRepository.save(patient);
+    }
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public AdminUserResponse getProfile(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        if (!(user instanceof Patient)) {
+            throw new IllegalArgumentException("Only patients can access this endpoint.");
+        }
+
+        Patient patient = (Patient) user;
+        return convertToAdminUserResponse(patient);
+    }
+
+    public AdminUserResponse updateProfile(AdminUserUpdateRequest request, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        if (!(user instanceof Patient)) {
+            throw new IllegalArgumentException("Only patients can access this endpoint.");
+        }
+
+        Patient patient = (Patient) user;
+
+        patient.setFullName(request.getFullName());
+        patient.setEmail(request.getEmail());
+        patient.setAddress(request.getAddress());
+        patient.setContactNumber(request.getContactNumber());
+        patient.setDateOfBirth(request.getDateOfBirth());
+
+        Patient saved = patientRepository.save(patient);
+        return convertToAdminUserResponse(saved);
+    }
+
+    private AdminUserResponse convertToAdminUserResponse(Patient patient) {
+        return new AdminUserResponse(
+                patient.getUserId(),
+                patient.getUsername(),
+                patient.getFullName(),
+                patient.getEmail(),
+                patient.getRole(),
+                patient.isActive(),
+                patient.getAddress(),
+                patient.getContactNumber(),
+                patient.getDateOfBirth()
+        );
     }
 }

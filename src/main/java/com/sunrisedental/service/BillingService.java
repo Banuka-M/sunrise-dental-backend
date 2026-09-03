@@ -545,4 +545,9 @@ public class BillingService {
 
         return response;
     }
+    public byte[] generateBillPdf(Long billId, String username) {
+        // TODO: Generate actual PDF using iText, OpenPDF, or JasperReports
+        // For now, return empty bytes or throw if not implemented
+        throw new UnsupportedOperationException("PDF generation not yet implemented.");
+    }
 }

@@ -3,10 +3,13 @@ package com.sunrisedental.controller;
 import com.sunrisedental.dto.BillResponse;
 import com.sunrisedental.dto.PaymentRequest;
 import com.sunrisedental.dto.PaymentResponse;
+import com.sunrisedental.service.BillPdfService;
 import com.sunrisedental.service.BillingService;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +22,15 @@ import java.util.List;
 public class PatientBillingController {
 
     private final BillingService billingService;
+    private final BillPdfService billPdfService;
 
     public PatientBillingController(
-            BillingService billingService) {
+            BillingService billingService,
+            BillPdfService billPdfService) {
 
         this.billingService = billingService;
+        this.billPdfService = billPdfService;
     }
-
 
     @GetMapping
     public ResponseEntity<List<BillResponse>>
@@ -38,7 +43,6 @@ public class PatientBillingController {
                 )
         );
     }
-
 
     @GetMapping("/{billId}")
     public ResponseEntity<BillResponse>
@@ -53,7 +57,6 @@ public class PatientBillingController {
                 )
         );
     }
-
 
     @PostMapping("/{billId}/payments")
     public ResponseEntity<PaymentResponse>
@@ -71,8 +74,6 @@ public class PatientBillingController {
         );
     }
 
-
-
     @GetMapping("/{billId}/payments")
     public ResponseEntity<List<PaymentResponse>>
     getPayments(
@@ -85,5 +86,29 @@ public class PatientBillingController {
                         authentication.getName()
                 )
         );
+    }
+
+    @GetMapping("/{billId}/download")
+    public ResponseEntity<byte[]> downloadBill(
+            @PathVariable Long billId,
+            Authentication authentication) {
+
+        BillResponse bill = billingService.getPatientBill(
+                billId,
+                authentication.getName()
+        );
+
+        List<PaymentResponse> payments = billingService.getPaymentsForBill(
+                billId,
+                authentication.getName()
+        );
+
+        byte[] pdfBytes = billPdfService.generateBillPdf(bill, payments);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"bill-" + bill.getBillNumber() + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }
